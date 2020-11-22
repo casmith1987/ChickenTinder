@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { LoginScreen, HomeScreen, RegistrationScreen } from './src/screens';
+import Cards from './src/screens/Cards/Cards';
 import { decode, encode } from 'base-64';
 import { firebase } from './src/firebase/config';
 import { Text } from 'react-native';
+import { ScreenStackHeaderBackButtonImage } from 'react-native-screens';
 
 if (!global.btoa) {
   global.btoa = encode;
@@ -49,12 +51,16 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         {user ? (
-          <Stack.Screen name="Home">
-            {(props) => (
-              <HomeScreen {...props} extraData={user} setUser={setUser} />
-            )}
-            {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
-          </Stack.Screen>
+          <>
+            <Stack.Screen name="Home">
+              {(props) => (
+                <HomeScreen {...props} extraData={user} setUser={setUser} />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="Cards">
+              {(props) => <Cards {...props} extraData={user} />}
+            </Stack.Screen>
+          </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />

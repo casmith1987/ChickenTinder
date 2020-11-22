@@ -76,11 +76,28 @@ export default function HomeScreen(props) {
       .then(() => {
         if (unsubscribe) unsubscribe();
         props.setUser(null);
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
   return (
     <View style={styles.container}>
+      <View style={styles.formContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            if (unsubscribe) unsubscribe();
+            props.navigation.navigate('Cards');
+          }}
+        >
+          <Text style={styles.buttonText}>Cards</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={logout}>
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.formContainer}>
         <TextInput
           style={styles.input}
@@ -93,9 +110,6 @@ export default function HomeScreen(props) {
         />
         <TouchableOpacity style={styles.button} onPress={onAddButtonPress}>
           <Text style={styles.buttonText}>Add</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={logout}>
-          <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
       {restaurants && (
