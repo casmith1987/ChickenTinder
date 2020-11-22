@@ -17,13 +17,14 @@ export default function HomeScreen(props) {
   const restaurantRef = firebase.firestore().collection('restaurants');
   const userID = props.extraData.id;
 
+  let unsubscribe;
+
   useEffect(() => {
-    restaurantRef
+    unsubscribe = restaurantRef
       .where('authorID', '==', userID)
       .orderBy('createdAt', 'desc')
       .onSnapshot(
         (querySnapshot) => {
-          console.log(querySnapshot);
           const newRestaurants = [];
           querySnapshot.forEach((doc) => {
             const restaurant = doc.data();
@@ -68,6 +69,16 @@ export default function HomeScreen(props) {
     );
   };
 
+  const logout = () => {
+    firebase
+      .auth()
+      .signOut()
+      .then(() => {
+        if (unsubscribe) unsubscribe();
+        props.setUser(null);
+      });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.formContainer}>
@@ -82,6 +93,9 @@ export default function HomeScreen(props) {
         />
         <TouchableOpacity style={styles.button} onPress={onAddButtonPress}>
           <Text style={styles.buttonText}>Add</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={logout}>
+          <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
       {restaurants && (
