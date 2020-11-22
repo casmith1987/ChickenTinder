@@ -36,6 +36,16 @@ export default function RegistrationScreen({ navigation }) {
           .catch((error) => {
             alert(error);
           });
+        const restaurantRef = firebase.firestore().collection('restaurants');
+        const restaurantData = {
+          restaurants: [],
+        };
+        restaurantRef
+          .doc(uid)
+          .set(restaurantData)
+          .catch((error) => {
+            alert(error);
+          });
       })
       .catch((error) => {
         alert(error);

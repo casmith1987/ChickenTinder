@@ -14,29 +14,24 @@ export default function HomeScreen(props) {
   const [restaurantText, setRestaurantText] = useState('');
   const [restaurants, setRestaurants] = useState([]);
 
-  const restaurantRef = firebase.firestore().collection('restaurants');
   const userID = props.extraData.id;
+  const restaurantRef = firebase
+    .firestore()
+    .collection('restaurants')
+    .doc(userID);
 
   let unsubscribe;
 
   useEffect(() => {
-    unsubscribe = restaurantRef
-      .where('authorID', '==', userID)
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(
-        (querySnapshot) => {
-          const newRestaurants = [];
-          querySnapshot.forEach((doc) => {
-            const restaurant = doc.data();
-            restaurant.id = doc.id;
-            newRestaurants.push(restaurant);
-          });
-          setRestaurants(newRestaurants);
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
+    unsubscribe = restaurantRef.onSnapshot(
+      (querySnapshot) => {
+        const newRestaurants = querySnapshot.data().restaurants;
+        setRestaurants(newRestaurants);
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
   }, []);
 
   const onAddButtonPress = () => {
@@ -48,7 +43,9 @@ export default function HomeScreen(props) {
         createdAt: timestamp,
       };
       restaurantRef
-        .add(data)
+        .update({
+          restaurants: firebase.firestore.FieldValue.arrayUnion(restaurantText),
+        })
         .then((_doc) => {
           setRestaurantText('');
           Keyboard.dismiss();
@@ -62,9 +59,7 @@ export default function HomeScreen(props) {
   const renderRestaurant = ({ item, index }) => {
     return (
       <View style={styles.entityContainer}>
-        <Text style={styles.entityText}>
-          {index}. {item.text}
-        </Text>
+        <Text style={styles.entityText}>{item}</Text>
       </View>
     );
   };

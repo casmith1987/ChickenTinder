@@ -126,46 +126,23 @@ class Card extends React.Component {
   }
 
   async componentDidMount() {
-    // let restaurants = [];
-    // let { data } = await axios.get(
-    //   // 'https://developers.zomato.com/api/v2.1/geocode?lat=41.9374&lon=-88.7425',
-    //   // {
-    //   //   headers: {
-    //   //     'user-key': '60ec69519f566f1344e4fd1ab27c04fe',
-    //   //   },
-    //   // }
-
-    //   'https://maps.googleapis.com/maps/api/place/textsearch/json?query=Restaurant&location=41.9375,-88.7425&radius=10&key=AIzaSyD1qE51csQAx2MijMZ5FG03MTRh5g-kyj8&types=food'
-    // );
-    // // console.log('WHAT THE FUCK', data);
-    // restaurants = [...data.results];
-    // this.setState({ ...this.state, nextPage: data.next_page_token });
-    // restaurants = restaurants.map((x) => x.name);
-    // console.log('RESTAURANTS', restaurants);
-    // this.setState({ ...this.state, restaurants: restaurants });
-    const restaurantRef = firebase.firestore().collection('restaurants');
     const userID = this.props.extraData.id;
+    const restaurantRef = firebase
+      .firestore()
+      .collection('restaurants')
+      .doc(userID);
 
     let unsubscribe;
 
-    unsubscribe = restaurantRef
-      .where('authorID', '==', userID)
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(
-        (querySnapshot) => {
-          const newRestaurants = [];
-          querySnapshot.forEach((doc) => {
-            const restaurant = doc.data();
-            restaurant.id = doc.id;
-            newRestaurants.push(restaurant);
-          });
-          let newRestaurantsToState = newRestaurants.map((x) => x.text);
-          this.setState({ ...this.state, restaurants: newRestaurantsToState });
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
+    unsubscribe = restaurantRef.onSnapshot(
+      (querySnapshot) => {
+        let newRestaurants = querySnapshot.data().restaurants;
+        this.setState({ ...this.state, restaurants: newRestaurants });
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
   }
 
   renderFoods = () => {
