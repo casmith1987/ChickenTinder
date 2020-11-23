@@ -4,10 +4,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { LoginScreen, HomeScreen, RegistrationScreen } from './src/screens';
 import Cards from './src/screens/Cards/Cards';
+import Pass from './src/screens/Cards/Pass';
 import { decode, encode } from 'base-64';
 import { firebase } from './src/firebase/config';
 import { Text } from 'react-native';
-import { ScreenStackHeaderBackButtonImage } from 'react-native-screens';
 
 if (!global.btoa) {
   global.btoa = encode;
@@ -56,6 +56,9 @@ export default function App() {
               {(props) => (
                 <HomeScreen {...props} extraData={user} setUser={setUser} />
               )}
+            </Stack.Screen>
+            <Stack.Screen name="Pass">
+              {(props) => <Pass {...props} extraData={user} />}
             </Stack.Screen>
             <Stack.Screen name="Cards">
               {(props) => <Cards {...props} extraData={user} />}

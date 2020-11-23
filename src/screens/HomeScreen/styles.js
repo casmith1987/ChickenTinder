@@ -40,6 +40,7 @@ export default StyleSheet.create({
     fontSize: 16,
   },
   listContainer: {
+    height: 500,
     marginTop: 20,
     padding: 20,
   },

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import styles from './styles';
 import { firebase } from '../../firebase/config';
+import axios from 'axios';
 
 export default function HomeScreen(props) {
   const [restaurantText, setRestaurantText] = useState('');
@@ -34,17 +35,20 @@ export default function HomeScreen(props) {
     );
   }, []);
 
+  const reset = () => {
+    restaurantRef.set({ restaurants: [] });
+  };
+
   const onAddButtonPress = () => {
     if (restaurantText && restaurantText.length > 0) {
       const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-      const data = {
-        text: restaurantText,
-        authorID: userID,
-        createdAt: timestamp,
+      let newObj = {
+        name: restaurantText,
+        votes: 0,
       };
       restaurantRef
         .update({
-          restaurants: firebase.firestore.FieldValue.arrayUnion(restaurantText),
+          restaurants: firebase.firestore.FieldValue.arrayUnion(newObj),
         })
         .then((_doc) => {
           setRestaurantText('');
@@ -56,10 +60,20 @@ export default function HomeScreen(props) {
     }
   };
 
+  const load = async () => {
+    let { data } = await axios.get(
+      'https://maps.googleapis.com/maps/api/place/textsearch/json?query=Restaurant&location=41.9375,-88.7425&radius=10&key=AIzaSyD1qE51csQAx2MijMZ5FG03MTRh5g-kyj8&types=food'
+    );
+    let newRestaurants = data.results
+      .map((x) => x.name)
+      .map((x) => ({ name: x, votes: 0 }));
+    await restaurantRef.set({ restaurants: newRestaurants });
+  };
+
   const renderRestaurant = ({ item, index }) => {
     return (
-      <View style={styles.entityContainer}>
-        <Text style={styles.entityText}>{item}</Text>
+      <View style={styles.entityContainer} key={index}>
+        <Text style={styles.entityText}>{item.name}</Text>
       </View>
     );
   };
@@ -80,6 +94,12 @@ export default function HomeScreen(props) {
   return (
     <View style={styles.container}>
       <View style={styles.formContainer}>
+        <TouchableOpacity style={styles.button} onPress={load}>
+          <Text style={styles.buttonText}>Load</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={reset}>
+          <Text style={styles.buttonText}>Reset</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
@@ -112,7 +132,7 @@ export default function HomeScreen(props) {
           <FlatList
             data={restaurants}
             renderItem={renderRestaurant}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => restaurants.indexOf(item)}
             removeClippedSubviews={true}
           />
         </View>
